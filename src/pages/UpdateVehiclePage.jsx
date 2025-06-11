@@ -103,7 +103,7 @@ export default function UpdateVehiclePage() {
           errorMessage = 'Vehicle not found. It may have been deleted.';
         } else if (err.response?.status === 401) {
           errorMessage = 'Session expired. Please log in again.';
-          setTimeout(() => navigate('/login'), 2000);
+          setTimeout(() => navigate('/'), 2000);
         } else if (err.response?.status === 403) {
           errorMessage = 'Access denied. Admin privileges required.';
         } else if (err.response?.data?.msg) {
@@ -180,7 +180,7 @@ export default function UpdateVehiclePage() {
         errorMessage = 'Vehicle not found or API endpoint not available. Please check if the backend is running.';
       } else if (err.response?.status === 401) {
         errorMessage = 'Session expired. Please log in again.';
-        setTimeout(() => navigate('/login'), 2000);
+        setTimeout(() => navigate('/'), 2000);
       } else if (err.response?.status === 403) {
         errorMessage = 'Access denied. Admin privileges required.';
       } else if (err.response?.data?.msg) {

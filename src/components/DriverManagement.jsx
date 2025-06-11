@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Plus, 
-  Search, 
-  Eye, 
-  EyeOff, 
-  UserPlus, 
+import {
+  User,
+  Mail,
+  Lock,
+  Plus,
+  Search,
+  Eye,
+  EyeOff,
+  UserPlus,
   Calendar,
   Badge,
   Users,
@@ -18,6 +18,8 @@ import {
   AlertCircle,
   Check
 } from 'lucide-react';
+
+import API from '../utils/api';
 
 // Loading Spinner Component
 const LoadingSpinner = () => (
@@ -76,6 +78,8 @@ const MessageAlert = ({ message, type, onClose }) => {
 // Driver Stats Component
 const DriverStats = ({ drivers }) => {
   const totalDrivers = drivers.length;
+  // Assuming a 'status' field or similar for active drivers, or just counting all if no status exists.
+  // For now, let's just count all drivers if 'role' is the only distinguishing factor
   const activeDrivers = drivers.filter(driver => driver.role === 'driver').length;
   const recentDrivers = drivers.filter(driver => {
     const createdDate = new Date(driver.createdAt);
@@ -136,7 +140,7 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!driverForm.name.trim()) {
       errors.name = 'Name is required';
     } else if (driverForm.name.trim().length < 2) {
@@ -161,14 +165,14 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
     clearMessages();
-    
+
     try {
       await onCreateDriver(driverForm);
       setDriverForm({ name: '', email: '', password: '' });
@@ -214,8 +218,8 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
             <input
               type="text"
               className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                formErrors.name 
-                  ? 'border-red-300 bg-red-50' 
+                formErrors.name
+                  ? 'border-red-300 bg-red-50'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
               placeholder="Enter driver's full name"
@@ -243,8 +247,8 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
             <input
               type="email"
               className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                formErrors.email 
-                  ? 'border-red-300 bg-red-50' 
+                formErrors.email
+                  ? 'border-red-300 bg-red-50'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
               placeholder="Enter driver's email address"
@@ -272,8 +276,8 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
             <input
               type={showPassword ? 'text' : 'password'}
               className={`block w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
-                formErrors.password 
-                  ? 'border-red-300 bg-red-50' 
+                formErrors.password
+                  ? 'border-red-300 bg-red-50'
                   : 'border-gray-300 hover:border-gray-400'
               }`}
               placeholder="Enter a secure password"
@@ -327,7 +331,7 @@ const DriverForm = ({ onCreateDriver, setMessage, setError, clearMessages }) => 
 };
 
 // Enhanced Driver Table Component
-const DriverTable = ({ drivers }) => {
+const DriverTable = ({ drivers, onDeleteDriver }) => { // Accept onDeleteDriver prop
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
@@ -340,12 +344,12 @@ const DriverTable = ({ drivers }) => {
   const sortedDrivers = [...filteredDrivers].sort((a, b) => {
     let aValue = a[sortBy];
     let bValue = b[sortBy];
-    
+
     if (sortBy === 'createdAt') {
       aValue = new Date(aValue);
       bValue = new Date(bValue);
     }
-    
+
     if (sortOrder === 'asc') {
       return aValue > bValue ? 1 : -1;
     } else {
@@ -376,7 +380,7 @@ const DriverTable = ({ drivers }) => {
               <p className="text-gray-600">Manage and view all registered drivers</p>
             </div>
           </div>
-          
+
           {/* Search Bar */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -402,8 +406,8 @@ const DriverTable = ({ drivers }) => {
               {searchTerm ? 'No drivers found' : 'No drivers registered yet'}
             </p>
             <p className="text-gray-400">
-              {searchTerm 
-                ? 'Try adjusting your search terms' 
+              {searchTerm
+                ? 'Try adjusting your search terms'
                 : 'Create your first driver to get started'
               }
             </p>
@@ -412,7 +416,7 @@ const DriverTable = ({ drivers }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('name')}
                 >
@@ -425,7 +429,7 @@ const DriverTable = ({ drivers }) => {
                     )}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('email')}
                 >
@@ -441,7 +445,7 @@ const DriverTable = ({ drivers }) => {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Role
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
                   onClick={() => handleSort('createdAt')}
                 >
@@ -496,7 +500,10 @@ const DriverTable = ({ drivers }) => {
                       <button className="text-blue-600 hover:text-blue-900 transition-colors p-1 rounded hover:bg-blue-50">
                         <Edit className="h-4 w-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50">
+                      <button
+                        onClick={() => onDeleteDriver(driver._id)} // Call onDeleteDriver
+                        className="text-red-600 hover:text-red-900 transition-colors p-1 rounded hover:bg-red-50"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                       <button className="text-gray-600 hover:text-gray-900 transition-colors p-1 rounded hover:bg-gray-50">
@@ -535,26 +542,59 @@ const DriverTable = ({ drivers }) => {
 };
 
 // Main Enhanced Driver Management Component
-export default function DriverManagement({ onCreateDriver, drivers, message, error, setMessage, setError, clearMessages }) {
+export default function DriverManagement({ onCreateDriver, drivers, message, error, setMessage, setError, clearMessages, fetchDrivers }) { // Add fetchDrivers
+  const handleDeleteDriver = async (driverId) => {
+    if (window.confirm('Are you sure you want to delete this driver?')) { // Confirmation dialog
+      clearMessages();
+      try {
+        // You'll need to replace this with your actual API call logic (e.g., using axios or fetch)
+        const token = localStorage.getItem('token'); // Get token from local storage
+        if (!token) {
+          setError('Authentication token not found. Please log in.');
+          return;
+        }
+
+        const response = await fetch(`/api/drivers/${driverId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // Include the token
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.msg || 'Failed to delete driver');
+        }
+
+        setMessage('Driver deleted successfully!');
+        fetchDrivers(); // Re-fetch drivers to update the list
+      } catch (err) {
+        console.error('Error deleting driver:', err);
+        setError(err.message || 'Failed to delete driver. Please try again.');
+      }
+    }
+  };
+
   return (
     <div className="space-y-8 p-6 bg-gray-50 min-h-screen">
       {/* Messages */}
-      <MessageAlert 
-        message={message} 
-        type="success" 
-        onClose={() => setMessage('')} 
+      <MessageAlert
+        message={message}
+        type="success"
+        onClose={() => setMessage('')}
       />
-      <MessageAlert 
-        message={error} 
-        type="error" 
-        onClose={() => setError('')} 
+      <MessageAlert
+        message={error}
+        type="error"
+        onClose={() => setError('')}
       />
 
       {/* Stats */}
       <DriverStats drivers={drivers} />
 
       {/* Driver Form */}
-      <DriverForm 
+      <DriverForm
         onCreateDriver={onCreateDriver}
         setMessage={setMessage}
         setError={setError}
@@ -562,7 +602,10 @@ export default function DriverManagement({ onCreateDriver, drivers, message, err
       />
 
       {/* Driver Table */}
-      <DriverTable drivers={drivers} />
+      <DriverTable
+        drivers={drivers}
+        onDeleteDriver={handleDeleteDriver} // Pass the delete function
+      />
     </div>
   );
 }
